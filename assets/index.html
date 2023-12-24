@@ -51,22 +51,25 @@
       let textElem;
       addEventListener(
         "load",
-        () => (textElem = document.getElementById("text"))
+        () => textElem = document.getElementById("text")
       );
 
-      const url = (function () {
+      const url = function () {
         const url = new URL(location.href);
         return `${location.protocol}//${
           url.hostname === "localhost" ? "127.0.0.1" : url.hostname
         }:${url.port}`;
-      })();
+      }();
       function getText() {
         return textElem?.value ?? "";
       }
-      function sendText() {
+      function sendText(once = false) {
         fetch(url, {
           method: "POST",
-          body: getText(),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ text : getText(), once }),
         }).then(alertBody);
       }
       function copyToClipboard() {
@@ -87,6 +90,7 @@
       <textarea id="text"></textarea>
       <div style="display: flex; gap: 1em; justify-content: center">
         <button onclick="sendText()">送信</button>
+        <button onclick="sendText(true)">送信(一度のみ)</button>
         <button onclick="fetch(url).then(alertBody)">停止</button>
         <button onclick="copyToClipboard()">クリップボードにコピー</button>
       </div>
