@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f5f8fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      #chat-box {
+        width: 60%;
+        height: 40%;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      #text {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        height: calc(100% - 90px);
+        font-size: 50px;
+        resize: none;
+      }
+      button {
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 30px;
+      }
+      button:hover {
+        background-color: #1da1f2;
+        color: #fff;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+    </style>
+    <script>
+      let textElem;
+      addEventListener(
+        "load",
+        () => (textElem = document.getElementById("text"))
+      );
+
+      const url = (function () {
+        const url = new URL(location.href);
+        return `${location.protocol}//${
+          url.hostname === "localhost" ? "127.0.0.1" : url.hostname
+        }:${url.port}`;
+      })();
+      function getText() {
+        return textElem?.value ?? "";
+      }
+      function sendText() {
+        fetch(url, {
+          method: "POST",
+          body: getText(),
+        }).then(alertBody);
+      }
+      function copyToClipboard() {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(getText());
+        } else {
+          textElem.select();
+          document.execCommand("copy");
+        }
+      }
+      function alertBody(res) {
+        res.text().then(alert);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="chat-box">
+      <textarea id="text"></textarea>
+      <div style="display: flex; gap: 1em; justify-content: center">
+        <button onclick="sendText()">送信</button>
+        <button onclick="fetch(url).then(alertBody)">停止</button>
+        <button onclick="copyToClipboard()">クリップボードにコピー</button>
+      </div>
+    </div>
+  </body>
+</html>
