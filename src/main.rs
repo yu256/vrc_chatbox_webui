@@ -8,12 +8,8 @@ use axum::{
 use endpoints::{send_text, stop_send};
 use local_ip_address::local_ip;
 use responder::AppError;
-use std::{env, net::UdpSocket, sync::OnceLock};
-use tokio::{sync::Mutex, task::JoinHandle};
+use std::env;
 use tower_http::services::ServeFile;
-
-static HANDLER: OnceLock<Mutex<Option<JoinHandle<()>>>> = OnceLock::new();
-static SOCK: OnceLock<UdpSocket> = OnceLock::new();
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -32,15 +28,21 @@ async fn main() -> Result<()> {
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await?;
 
+    print_address(port)?;
+
+    axum::serve(listener, app).await?;
+
+    Ok(())
+}
+
+fn print_address(port: usize) -> Result<()> {
     let local_ip = local_ip()?;
 
     if port == 80 {
         println!("http://{local_ip}/front");
     } else {
-        println!("http://{local_ip}:{port}/front")
+        println!("http://{local_ip}:{port}/front");
     }
-
-    axum::serve(listener, app).await?;
 
     Ok(())
 }

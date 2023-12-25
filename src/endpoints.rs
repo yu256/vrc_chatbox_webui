@@ -1,4 +1,3 @@
-use crate::{HANDLER, SOCK};
 use anyhow::Result;
 use axum::Json;
 use rosc::{encoder, OscMessage, OscPacket, OscType};
@@ -6,9 +5,13 @@ use serde::{Deserialize, Serialize};
 use std::{
     net::{SocketAddrV4, UdpSocket},
     str::FromStr as _,
+    sync::OnceLock,
     time::Duration,
 };
 use tokio::{sync::Mutex, task::JoinHandle};
+
+static HANDLER: OnceLock<Mutex<Option<JoinHandle<()>>>> = OnceLock::new();
+static SOCK: OnceLock<UdpSocket> = OnceLock::new();
 
 #[derive(Serialize, Deserialize)]
 pub(super) struct Query {
